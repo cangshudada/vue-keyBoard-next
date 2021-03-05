@@ -1,0 +1,98 @@
+.key-board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1535px;
+  height: auto;
+  border-radius: 45px;
+  user-select: none;
+  z-index: 3000;
+
+  .key-board-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 45px;
+    background: #ededed;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.16);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .key-board-area {
+      margin: 50px 0;
+      width: 1435px;
+      height: 513px;
+      background: #e0e0e0;
+      border-radius: 31px;
+    }
+  }
+
+  .key-board-drag-handle {
+    cursor: move;
+    position: absolute;
+    bottom: -50px;
+    right: 20px;
+    background-image: url("https://www.cmappax.com/editorResource/keyboard/dragCH.svg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    width: 430px;
+    height: 75px;
+    z-index: -1;
+    display: flex;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 100px;
+    letter-spacing: 2px;
+    text-indent: 75px;
+
+    span {
+      max-width: 300px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    svg {
+      position: absolute;
+      right: 55px;
+      top: 65%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
+
+.key-board-modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: #000;
+  opacity: 0.5;
+  z-index: 2999;
+}
+
+/* move-bottom-to-top */
+.move-bottom-to-top-enter-active {
+  animation: moveFromTop 0.6s ease both;
+}
+
+.move-bottom-to-top-leave-active {
+  animation: moveToTop 0.6s ease both;
+}
+
+@keyframes moveFromTop {
+  from {
+    transform: translate(-50%, 100%);
+  }
+}
+
+@keyframes moveToTop {
+  to {
+    transform: translate(-50%, 100%);
+  }
+}
