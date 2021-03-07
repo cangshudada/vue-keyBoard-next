@@ -22,7 +22,7 @@
         <input data-mode="handwrite" class="form-control" v-model="value" />
       </div>
     </form>
-    <KeyBoard modal />
+    <KeyBoard modal :color="color" />
   </div>
 </template>
 
@@ -33,7 +33,7 @@ export default defineComponent({
     const value = ref<string>("");
 
     return {
-      value
+      value,
     };
   },
 });
