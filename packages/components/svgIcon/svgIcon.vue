@@ -25,11 +25,11 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { color } = getInject();
+    const injectData = getInject();
     const iconName = computed(() => `#icon-${props.iconClass}`);
 
     return {
-      color,
+      color: injectData?.color,
       iconName,
     };
   },

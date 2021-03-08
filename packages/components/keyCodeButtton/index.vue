@@ -48,7 +48,7 @@ export default defineComponent({
   },
   emits: ["click"],
   setup(props, { emit }) {
-    const { color } = getInject();
+    const injectData = getInject();
     const isHoverStatus = ref<boolean>(false);
 
     // computed
@@ -68,11 +68,11 @@ export default defineComponent({
       ) {
         return {
           color: "#f5f5f5",
-          background: color,
+          background: injectData?.color,
         };
       } else {
         return {
-          color,
+          color: injectData?.color,
           background: "#f5f5f5",
         };
       }

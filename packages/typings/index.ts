@@ -1,3 +1,7 @@
+import { App } from "vue";
+
+export type SFCWithInstall<T> = T & { install(app: App): void; }
+
 export type IValue = Partial<Record<"code" | "value", string>>;
 export interface IDictionary<T> {
   [key: string]: T;

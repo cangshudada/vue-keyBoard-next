@@ -1,4 +1,4 @@
-import { IDictionary } from '../';
+import { IDictionary } from '../typings/index';
 class EventEmitter {
   private listeners: IDictionary<
     undefined | null | ((...args: any[]) => void)[]

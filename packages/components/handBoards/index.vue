@@ -31,7 +31,7 @@ export default defineComponent({
     KeyCodeButton,
   },
   setup() {
-    const { closeKeyBoard, changeDefaultBoard } = getInject();
+    const injectData = getInject();
     const paintPartData = reactive<IPaintPartData>({
       // 手写板部分按钮列表
       handBoardOperList: [
@@ -65,13 +65,13 @@ export default defineComponent({
         //  关闭
         case "close":
           {
-            closeKeyBoard();
+            injectData?.closeKeyBoard();
           }
           break;
         //  回退
         case "back":
           {
-            changeDefaultBoard();
+            injectData?.changeDefaultBoard();
             useEventEmitter.emit("resultReset");
             useEventEmitter.emit("keyBoardChange", paintPartData.isCn && "CN");
           }

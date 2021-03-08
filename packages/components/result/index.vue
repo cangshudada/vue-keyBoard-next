@@ -45,9 +45,9 @@ export default defineComponent({
   },
   emits: ["change"],
   setup(props: { data: IValue }, { emit }) {
-    const { color } = getInject();
+    const injectData = getInject();
     const getStyle = computed(() => ({
-      borderTopColor: color,
+      borderTopColor: injectData?.color,
     }));
     const resultData = reactive<IResultData>({
       status: "",
@@ -117,7 +117,7 @@ export default defineComponent({
 
       useEventEmitter.on("getWordsFromServer", (serverData: string) => {
         const _valueList = Array.from(
-          new Set(serverData.replace(/\s+/g, "").split("")) 
+          new Set(serverData.replace(/\s+/g, "").split(""))
         );
         resultData.valueList = _valueList;
         resultData.showList = groupSplitArray(_valueList, 11);
@@ -130,7 +130,7 @@ export default defineComponent({
     });
 
     return {
-      color,
+      color: injectData?.color,
       upper,
       lower,
       getStyle,

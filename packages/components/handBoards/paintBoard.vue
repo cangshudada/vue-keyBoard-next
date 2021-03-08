@@ -40,7 +40,7 @@ export default defineComponent({
     lib: String,
   },
   setup(props) {
-    const { color } = getInject();
+    const injectData = getInject();
     const paintBoardData = reactive<IPaintBoardData>({
       // 宽
       width: 0,
@@ -149,8 +149,8 @@ export default defineComponent({
         paintBoardData.clickY.push(cy);
         paintBoardData.clickC.push(0);
         //画图
-        ctx.strokeStyle = color;
-        ctx.fillStyle = color;
+        ctx.strokeStyle = injectData?.color;
+        ctx.fillStyle = injectData?.color;
         ctx.lineWidth = 4;
         ctx.lineCap = "round";
         ctx.moveTo(paintBoardData.oldX, paintBoardData.oldY);

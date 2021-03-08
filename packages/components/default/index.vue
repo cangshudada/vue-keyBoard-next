@@ -63,7 +63,7 @@ export default defineComponent({
   },
   emits: ["translate", "trigger", "change"],
   setup(props, { emit }) {
-    const { modeList, handApi, closeKeyBoard } = getInject();
+    const injectData = getInject();
     const defaultKeyBoardData = reactive<IDefaultKeyBoardData>({
       // 前三行不变的键码list
       lineList: [DEFAULT_CODE.line1, DEFAULT_CODE.line2, DEFAULT_CODE.line3],
@@ -86,9 +86,8 @@ export default defineComponent({
      */
     function getLine4Code() {
       defaultKeyBoardData.line4 = JSON.parse(JSON.stringify(defaultLineList));
-
       // 判定是否存在手写
-      if (modeList?.find((mode) => mode === "handwrite") && handApi) {
+      if (injectData?.modeList?.find((mode) => mode === "handwrite") && injectData?.handApi) {
         defaultKeyBoardData.line4.splice(2, 0, {
           data: "",
           type: "handwrite",
@@ -105,7 +104,7 @@ export default defineComponent({
         case "close":
           {
             defaultKeyBoardData.oldVal = "";
-            closeKeyBoard();
+            injectData?.closeKeyBoard();
           }
           break;
         //  大小写
@@ -138,7 +137,7 @@ export default defineComponent({
               const numberCodeLine3List = JSON.parse(
                 JSON.stringify(NUMBER_CODE.line3)
               );
-              if (!modeList?.find((mode) => mode === "symbol")) {
+              if (!injectData?.modeList?.find((mode) => mode === "symbol")) {
                 numberCodeLine3List.shift();
                 numberCodeLine3List.unshift("+");
               }
