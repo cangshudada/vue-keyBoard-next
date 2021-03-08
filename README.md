@@ -1,8 +1,9 @@
 <p align="center">
-  <a href="https://www.cmappax.com/keyboard/vue2.x">
+  <a href="https://www.cmappax.com/keyboard/vue@next">
     <img width="500" src="https://www.cmappax.com/editorResource/keyboard/keyboard.svg" alt="Logo">
   </a>
 </p>
+
 
 <h3 align="center">
     Simple, Fast Key-Board.
@@ -11,19 +12,20 @@
 > ### keyBoard base on Vue3 , support hand write.
 
 <p align="center">  
-  <img alt="gzip size" src="https://img.badgesize.io/https://raw.githubusercontent.com/cangshudada/vue-keyBoard/main/lib/keyboard.min.js?compression=gzip&style=flat-square">
+  <img alt="gzip size" src="https://img.badgesize.io/https://raw.githubusercontent.com/cangshudada/vue-keyBoard-next/main/lib/index.js?compression=gzip&style=flat-square">
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-none-27ae60.svg?style=popout-square">
-  <a href="https://github.com/cangshudada/vue-keyBoard/releases"><img alt="Github Current version"
-  src="https://img.shields.io/github/v/release/cangshudada/vue-keyBoard.svg?style=flat-square"></a>
-  <a href="https://www.npmjs.com/package/keyboard-virtual-vue"><img alt="Npm Current version"
-  src="https://img.shields.io/npm/v/keyboard-virtual-vue.svg?style=flat-square"></a>
+  <a href="https://github.com/cangshudada/vue-keyBoard-next/releases"><img alt="Github Current version"
+  src="https://img.shields.io/github/v/release/cangshudada/vue-keyBoard-next.svg?style=flat-square"></a>
+  <a href="https://www.npmjs.com/package/vue-keyboard-virtual-next"><img alt="Npm Current version"
+  src="https://img.shields.io/npm/v/vue-keyboard-virtual-next.svg?style=flat-square"></a>
 </p>
 
 <br>
 
 <h4 align="center">
-  <a href="https://www.cmappax.com/keyboard/vue2.x">Fully Featured demo</a>
+  <a href="https://www.cmappax.com/keyboard/vue@next">Fully Featured demo</a>
 </h4>
+
 
 ## Overview
 
@@ -72,17 +74,14 @@ $ yarn add vue-keyboard-virtual-next --save
 ### 全局引入
 
 ```javascript
-import Vue from "vue";
-import App from "./app";
-import "vue-keyboard-virtual-next/keyboard.min.css";
-import KeyBoard from "vue-keyboard-virtual-next";
+import App from "./app.vue";
+import { createApp } from "vue";
+import "keyboard-virtual-vue/keyboard.min.css";
+import KeyBoard from "keyboard-virtual-vue";
 
-Vue.use(KeyBoard);
-
-new Vue({
-  el: "#app",
-  template: "<App/>",
-});
+createApp(App)
+  .use(keyBoard)
+  .mount("#app");
 ```
 
 ### 局部引入
@@ -91,20 +90,23 @@ new Vue({
 <template>
   <!-- keyboard 只识别带有 data-mode 标识的输入框 -->
   <input data-mode v-model="value" />
-  <Key-Board />
+  <KeyBoard />
 </template>
 
-<script>
+<script lang="ts">
 import "keyboard-virtual-vue/keyboard.min.css";
 import KeyBoard from "keyboard-virtual-vue";
-export default {
-  data() {
+import { defineComponent, ref } from "vue";
+export default defineComponent({
+  components: { KeyBoard },
+  setup() {
+    const value = ref<string>("你好");
+
     return {
-      value: "你好"
+      value,
     };
   },
-  components: { KeyBoard },
-};
+});
 </script>
 ```
 
@@ -145,13 +147,44 @@ export default {
 |   closed   |                键盘关闭事件                 |        () => void         | v1.0.0+ |
 | modalClick |                遮罩点击事件                 |        () => void         | v1.0.0+ |
 
-#### 
+
 
 ## Component Event
 
-| 方法名         | 说明                                                         | 参数  |
-| -------------- | ------------------------------------------------------------ | ----- |
-| signUpKeyboard | 重新给input注册绑定键盘,当页面有新的input标签出现时调用此方法 | event |
+| 方法名   | 说明                                                         | 参数  |
+| -------- | ------------------------------------------------------------ | ----- |
+| reSignUp | 重新给input注册绑定键盘,当页面有新的input标签出现时调用此方法 | event |
+
+```vue
+<template>
+  <!-- keyboard 只识别带有 data-mode 标识的输入框 -->
+  <input data-mode v-model="value" />
+  <KeyBoard ref="keyBoardRef"/>
+</template>
+
+<script lang="ts">
+import "keyboard-virtual-vue/keyboard.min.css";
+import KeyBoard from "keyboard-virtual-vue";
+import { defineComponent, ref, onMounted } from "vue";
+export default defineComponent({
+  components: { KeyBoard },
+  setup() {
+    const value = ref<string>("你好");
+    const keyBoardRef = ref<typeof KeyBoard | null>(null);
+      
+    onMounted(() => {
+        // xxxx逻辑 给键盘重新注册输入框
+        keyBoardRef.value?.reSignUp();
+    })
+
+    return {
+      value,
+      keyBoardRef
+    };
+  },
+});
+</script>
+```
 
 
 

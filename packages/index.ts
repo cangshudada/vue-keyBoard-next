@@ -1,5 +1,5 @@
 import { App } from "vue";
-import keyBoard from "./keyBoard.vue";
+import keyBoard from "./index.vue";
 type SFCWithInstall<T> = T & { install(app: App): void; }
 
 keyBoard.install = (app: App): void => {
