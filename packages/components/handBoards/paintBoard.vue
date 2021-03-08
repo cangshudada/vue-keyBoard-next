@@ -1,7 +1,7 @@
 <template>
   <div class="paint-board">
     <canvas
-      ref="canvas"
+      ref="canvasRef"
       :width="width"
       :height="height"
       @touchstart="down"
@@ -15,24 +15,37 @@
   </div>
 </template>
 
-<script>
-import { getWordFromHandWrite } from '@/server';
-export default {
+<script lang="ts">
+import { IPaintBoardData } from "@/typings";
+import { getWordFromHandWrite } from "@/server/index";
+import { getInject } from "@/context/keyboardContext";
+import useEventEmitter from "@/hooks/useEventEmitter";
+import {
+  ref,
+  toRefs,
+  nextTick,
+  reactive,
+  onMounted,
+  onUnmounted,
+  defineComponent,
+} from "vue";
+
+// canvas上下文
+let ctx: CanvasRenderingContext2D;
+// 定时器id
+let timer: number;
+export default defineComponent({
   name: "PaintBoard",
   props: {
-    lib: String
+    lib: String,
   },
-  inject: ["color"],
-  data() {
-    return {
+  setup(props) {
+    const { color } = getInject();
+    const paintBoardData = reactive<IPaintBoardData>({
       // 宽
       width: 0,
       // 高
       height: 0,
-      // canvas dom
-      canvas: null,
-      // canvas上下文
-      ctx: null,
       // 是否按下
       isMouseDown: false,
       // 当前canvas相距左上角x
@@ -49,121 +62,176 @@ export default {
       clickY: [],
       //轨迹标志位，为1则是终点
       clickC: [],
-      // 定时器id
-      timer: 0,
-    };
-  },
-  mounted() {
-    // 面板初始化
-    this.paintBoardInit();
-    // 拖动键盘需要
-    this.$EventBus?.$on("updateBound", () => {
-      this.updateBound();
-    })
-  },
-  methods: {
-    paintBoardInit() {
-      this.canvas = this.$refs.canvas;
-      this.ctx = this.canvas.getContext("2d");
-      this.reload();
-      this.updateBound();
-      window.addEventListener("animationend", this.updateBound);
-      window.addEventListener("resize", this.updateBound);
-      window.addEventListener("scroll", this.updateBound);
-    },
-    // 更新尺寸以及位置
-    updateBound() {
-      this.$nextTick(() => {
+    });
+
+    const canvasRef = ref<HTMLCanvasElement | null>(null);
+
+    /**
+     * @description 获取手写板书写文字
+     */
+    async function getWords() {
+      const { data } = await getWordFromHandWrite(
+        paintBoardData.clickX,
+        paintBoardData.clickY,
+        paintBoardData.clickC,
+        props.lib
+      );
+      useEventEmitter.emit("getWordsFromServer", data?.v || "");
+    }
+
+    /**
+     * @description canvas重置
+     */
+    function reload() {
+      if (!canvasRef.value || !ctx) return;
+      paintBoardData.clickX = [];
+      paintBoardData.clickY = [];
+      paintBoardData.clickC = [];
+      ctx.clearRect(0, 0, paintBoardData.width, paintBoardData.height);
+    }
+
+    /**
+     * @description 获取x坐标
+     */
+    function getCx(event: TouchEvent | MouseEvent): number {
+      // mouse事件
+      if (event.type.includes("mouse")) {
+        const _event = event as MouseEvent;
+        return Math.floor(_event.clientX - paintBoardData.x);
+      } else if (event.type.includes("touch")) {
+        // touch事件
+        const _event = event as TouchEvent;
+        return Math.floor(_event.targetTouches[0].clientX - paintBoardData.x);
+      }
+      return 0;
+    }
+
+    /**
+     * @description 获取y坐标
+     */
+    function getCy(event: TouchEvent | MouseEvent): number {
+      // mouse事件
+      if (event.type.includes("mouse")) {
+        const _event = event as MouseEvent;
+        return Math.floor(_event.clientY - paintBoardData.y);
+      } else if (event.type.includes("touch")) {
+        // touch事件
+        const _event = event as TouchEvent;
+        return Math.floor(_event.targetTouches[0].clientY - paintBoardData.y);
+      }
+      return 0;
+    }
+
+    /**
+     * @description 按下
+     */
+    function down(event: TouchEvent | MouseEvent) {
+      if (!ctx) return;
+      paintBoardData.isMouseDown = true;
+      const cx = getCx(event);
+      const cy = getCy(event);
+      clearTimeout(timer);
+      paintBoardData.oldX = cx;
+      paintBoardData.oldY = cy;
+      ctx.beginPath();
+    }
+
+    /**
+     * @description 移动
+     */
+    function move(event: TouchEvent | MouseEvent) {
+      if (!ctx) return;
+      event.preventDefault();
+      if (paintBoardData.isMouseDown) {
+        const cx = getCx(event);
+        const cy = getCy(event);
+        paintBoardData.clickX.push(cx);
+        paintBoardData.clickY.push(cy);
+        paintBoardData.clickC.push(0);
+        //画图
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 4;
+        ctx.lineCap = "round";
+        ctx.moveTo(paintBoardData.oldX, paintBoardData.oldY);
+        ctx.lineTo(cx, cy);
+        ctx.stroke();
+        paintBoardData.oldX = cx;
+        paintBoardData.oldY = cy;
+      }
+    }
+
+    /**
+     * @description 松开
+     */
+    function mouseup() {
+      if (paintBoardData.isMouseDown) {
+        paintBoardData.isMouseDown = false;
+        timer = setTimeout(() => {
+          reload();
+        }, 1500);
+        //标记最后一点为终点
+        paintBoardData.clickC.pop();
+        paintBoardData.clickC.push(1);
+        getWords();
+      }
+    }
+
+    /**
+     * @description 更新尺寸以及位置
+     */
+    function updateBound() {
+      nextTick(() => {
         if (!document.querySelector(".paint-board")) return;
-        const bound = document.querySelector(".paint-board").getBoundingClientRect();
-        this.x = bound.x;
-        this.y = bound.y;
-        this.width = parseFloat(
+        const bound = document
+          .querySelector(".paint-board")
+          .getBoundingClientRect();
+        paintBoardData.x = bound.x;
+        paintBoardData.y = bound.y;
+        paintBoardData.width = parseFloat(
           window.getComputedStyle(document.querySelector(".paint-board")).width
         );
-        this.height = parseFloat(
+        paintBoardData.height = parseFloat(
           window.getComputedStyle(document.querySelector(".paint-board")).height
         );
       });
-    },
-    // canvas重置
-    reload() {
-      if (!this.canvas || !this.ctx) return;
-      this.clickX = [];
-      this.clickY = [];
-      this.clickC = [];
-      this.ctx.clearRect(0, 0, this.width, this.height);
-    },
-    // 获取x坐标
-    getCx(event) {
-      if (!event.clientX && (!event.targetTouches || !event.targetTouches[0])) return 0;
-      return Math.floor(
-        (event.clientX || event.targetTouches[0].clientX) - this.x
-      );
-    },
-    // 获取y坐标
-    getCy(event) {
-      if (!event.clientX && (!event.targetTouches || !event.targetTouches[0])) return 0;
-      return Math.floor(
-        (event.clientY || event.targetTouches[0].clientY) - this.y
-      );
-    },
-    // 按下
-    down(event) {
-      if (!this.ctx) return;
-      this.isMouseDown = true;
-      const cx = this.getCx(event);
-      const cy = this.getCy(event);
-      clearTimeout(this.timer);
-      this.oldX = cx;
-      this.oldY = cy;
-      this.ctx.beginPath();
-    },
-    // 移动
-    move(event) {
-      if (!this.ctx) return;
-      event.preventDefault();
-      if (this.isMouseDown) {
-        const cx = this.getCx(event);
-        const cy = this.getCy(event);
-        this.clickX.push(cx);
-        this.clickY.push(cy);
-        this.clickC.push(0);
-        //画图
-        this.ctx.strokeStyle = this.color;
-        this.ctx.fillStyle = this.color;
-        this.ctx.lineWidth = 4;
-        this.ctx.lineCap = "round";
-        this.ctx.moveTo(this.oldX, this.oldY);
-        this.ctx.lineTo(cx, cy);
-        this.ctx.stroke();
-        this.oldX = cx;
-        this.oldY = cy;
-      }
-    },
-    // 松开
-    mouseup() {
-      if (this.isMouseDown) {
-        this.isMouseDown = false;
-        this.timer = setTimeout(() => {
-          this.reload();
-        }, 1500);
-        //标记最后一点为终点
-        this.clickC.pop();
-        this.clickC.push(1);
-        this.getWords();
-      }
-    },
-    // 获取文字
-    async getWords() {
-      const { data } = await getWordFromHandWrite(this.clickX, this.clickY, this.clickC, this.lib);
-      this.$EventBus?.$emit("getWordsFromServer", data?.v || "");
     }
+
+    /**
+     * @description 画板初始化
+     */
+    function paintBoardInit() {
+      ctx = canvasRef.value?.getContext("2d");
+      reload();
+      updateBound();
+      window.addEventListener("animationend", updateBound);
+      window.addEventListener("resize", updateBound);
+      window.addEventListener("scroll", updateBound);
+    }
+
+    onMounted(() => {
+      // 面板初始化
+      paintBoardInit();
+      // 拖动键盘需要
+      useEventEmitter.on("updateBound", () => {
+        updateBound();
+      });
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("animationend", updateBound);
+      window.removeEventListener("resize", updateBound);
+      window.removeEventListener("scroll", updateBound);
+      useEventEmitter.remove("updateBound");
+    });
+
+    return {
+      ...toRefs(paintBoardData),
+      move,
+      down,
+      mouseup,
+      canvasRef,
+    };
   },
-  beforeDestroy(){
-    window.removeEventListener("animationend", this.updateBound);
-    window.removeEventListener("resize", this.updateBound);
-    window.removeEventListener("scroll", this.updateBound);
-  }
-};
+});
 </script>

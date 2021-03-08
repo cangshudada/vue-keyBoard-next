@@ -31,9 +31,9 @@
 </template>
 
 <script lang="ts">
-import { IKeyCode } from "@/typings";
 import { getInject } from "@/context/keyboardContext";
 import useEventEmitter from "@/hooks/useEventEmitter";
+import { IDefaultKeyBoardData, IKeyCode } from "@/typings";
 import KeyCodeButton from "@/components/keyCodeButtton/index.vue";
 import { defineComponent, reactive, toRefs, onMounted } from "vue";
 import { DEFAULT_CODE, NUMBER_CODE, SYMBOL_CODE } from "@/constants/key_code";
@@ -64,7 +64,7 @@ export default defineComponent({
   emits: ["translate", "trigger", "change"],
   setup(props, { emit }) {
     const { modeList, handApi, closeKeyBoard } = getInject();
-    const defaultKeyBoardData = reactive({
+    const defaultKeyBoardData = reactive<IDefaultKeyBoardData>({
       // 前三行不变的键码list
       lineList: [DEFAULT_CODE.line1, DEFAULT_CODE.line2, DEFAULT_CODE.line3],
       // 第四行变动的键码
@@ -148,7 +148,7 @@ export default defineComponent({
                 numberCodeLine3List,
               ];
             } else {
-              useEventEmitter.emit("keyBoardChange", this.isCn ? "CN" : "EN");
+              useEventEmitter.emit("keyBoardChange", defaultKeyBoardData.isCn ? "CN" : "EN");
               defaultKeyBoardData.lineList = [
                 DEFAULT_CODE.line1,
                 DEFAULT_CODE.line2,

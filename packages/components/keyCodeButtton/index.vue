@@ -49,7 +49,7 @@ export default defineComponent({
   emits: ["click"],
   setup(props, { emit }) {
     const { color } = getInject();
-    const isHoverStatus = ref(false);
+    const isHoverStatus = ref<boolean>(false);
 
     // computed
     const getCode = computed(() => {

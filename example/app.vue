@@ -22,7 +22,7 @@
         <input data-mode="handwrite" class="form-control" v-model="value" />
       </div>
     </form>
-    <KeyBoard modal :color="color" />
+    <KeyBoard modal />
   </div>
 </template>
 
@@ -30,7 +30,7 @@
 import { defineComponent, ref } from "vue";
 export default defineComponent({
   setup() {
-    const value = ref<string>("");
+    const value = ref<string>("你好");
 
     return {
       value,

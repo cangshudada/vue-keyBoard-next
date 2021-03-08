@@ -17,14 +17,22 @@
   </div>
 </template>
 
-<script>
-import PaintBoard from "./paintBoard";
-import KeyCodeButton from "@/components/keyCodeButtton/index";
-export default {
+<script lang="ts">
+import PaintBoard from "./paintBoard.vue";
+import { IKeyCode, IPaintPartData } from "@/typings";
+import { getInject } from "@/context/keyboardContext";
+import useEventEmitter from "@/hooks/useEventEmitter";
+import { defineComponent, reactive, toRefs } from "vue";
+import KeyCodeButton from "@/components/keyCodeButtton/index.vue";
+export default defineComponent({
   name: "PaintPart",
-  inject: ["closeKeyBoard", "changeDefaultBoard"],
-  data() {
-    return {
+  components: {
+    PaintBoard,
+    KeyCodeButton,
+  },
+  setup() {
+    const { closeKeyBoard, changeDefaultBoard } = getInject();
+    const paintPartData = reactive<IPaintPartData>({
       // 手写板部分按钮列表
       handBoardOperList: [
         {
@@ -46,48 +54,52 @@ export default {
       ],
       // 是否中文
       isCn: true,
-    };
-  },
-  methods: {
-    click({ data, type }) {
+    });
+
+    /**
+     * @description 按钮点击
+     * @param {IKeyCode} parmas
+     */
+    function click({ data, type }: IKeyCode) {
       switch (type) {
         //  关闭
         case "close":
           {
-            this.closeKeyBoard();
+            closeKeyBoard();
           }
           break;
         //  回退
         case "back":
           {
-            this.changeDefaultBoard();
-            this.$EventBus?.$emit("resultReset");
-            this.$EventBus?.$emit("keyBoardChange", this.isCn && "CN");
+            changeDefaultBoard();
+            useEventEmitter.emit("resultReset");
+            useEventEmitter.emit("keyBoardChange", paintPartData.isCn && "CN");
           }
           break;
         //   语言
         case "change2lang":
           {
-            this.isCn = !this.isCn;
+            paintPartData.isCn = !paintPartData.isCn;
           }
           break;
         // 删除
         case "delete":
           {
-            this.$emit("trigger", {
+            useEventEmitter.emit("trigger", {
               data,
               type,
             });
           }
           break;
       }
-    },
+    }
+
+    return {
+      click,
+      ...toRefs(paintPartData),
+    };
   },
-  components: {
-    PaintBoard,
-    KeyCodeButton,
-  },
-};
+});
 </script>
 
 <style scoped lang='less'>

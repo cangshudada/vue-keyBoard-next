@@ -4,7 +4,7 @@
       <!-- 键盘主体 -->
       <div class="key-board-container">
         <!-- 结果展示 -->
-        <!-- <Result :data="resultVal" @change="change" /> -->
+        <Result :data="resultVal" @change="change" />
         <div class="key-board-area">
           <!-- 默认键盘 -->
           <DefaultBoard
@@ -15,11 +15,11 @@
             @translate="translate"
           />
           <!-- 手写键盘 -->
-          <!-- <HandBoard
+          <HandBoard
             v-if="showMode === 'handwrite'"
             @trigger="trigger"
             @change="change"
-          /> -->
+          />
         </div>
       </div>
       <!-- 拖拽句柄 -->
@@ -39,12 +39,14 @@
 <script lang="ts">
 import "@/libs/flexible.js";
 import "@/assets/css/keyBoard.less";
-import { computed, PropType, watch } from "vue";
+import type { PropType } from "vue";
 import handleDrag from "@/directive/drag";
+import Result from "@/components/result/index.vue";
 import { axiosConfig } from "./helper/axiosConfig";
 import useEventEmitter from "@/hooks/useEventEmitter";
 import SvgIcon from "@/components/svgIcon/svgIcon.vue";
 import { getProvide } from "@/context/keyboardContext";
+import HandBoard from "@/components/handBoards/index.vue";
 import DefaultBoard from "@/components/default/index.vue";
 import { pinYinNote } from "@/constants/pinyin_dict_note";
 import { IKeyboardData, IKeyCode, IKeyBoard } from "./typings";
@@ -100,7 +102,7 @@ export default defineComponent({
       default: true,
     },
     // v-model
-    value: String,
+    modelValue: String,
     // 手写识别接口  如果不存在则不会显示手写面板
     handApi: String,
     // 动画的className
@@ -108,10 +110,12 @@ export default defineComponent({
     // 拖拽句柄文字
     dargHandleText: String,
   },
-  emits: ["keyChange", "input", "change", "closed", "modalClick"],
+  emits: ["keyChange", "update:modelValue", "change", "closed", "modalClick"],
   directives: { handleDrag },
   components: {
+    Result,
     SvgIcon,
+    HandBoard,
     DefaultBoard,
   },
   setup(props: IKeyBoard, { emit }) {
@@ -126,7 +130,7 @@ export default defineComponent({
     });
 
     // 默认键盘ref
-    const defaultRef = ref(null);
+    const defaultBoardRef = ref<typeof DefaultBoard | null>(null);
 
     /**
      * @description 设置初始化键盘模式
@@ -141,7 +145,7 @@ export default defineComponent({
         case "en":
           keyboardData.showMode = "default";
           nextTick(() => {
-            defaultRef.value?.keyButtonTrigger({
+            defaultBoardRef.value?.click({
               data: "",
               type: "change2lang",
             });
@@ -151,7 +155,7 @@ export default defineComponent({
         case "number":
           keyboardData.showMode = "default";
           nextTick(() => {
-            defaultRef.value?.keyButtonTrigger({
+            defaultBoardRef.value?.click({
               data: ".?123",
               type: "change2num",
             });
@@ -177,11 +181,11 @@ export default defineComponent({
           // 如果存在标点键盘才允许切换
           if (props.modeList?.find((mode) => mode === "symbol")) {
             nextTick(() => {
-              defaultRef.value?.keyButtonTrigger({
+              defaultBoardRef.value?.click({
                 data: ".?123",
                 type: "change2num",
               });
-              defaultRef.value?.keyButtonTrigger({
+              defaultBoardRef.value?.click({
                 data: "#+=",
                 type: "#+=",
               });
@@ -305,9 +309,12 @@ export default defineComponent({
           {
             let changeValue: string;
             // v-model exist
-            if (props.value) {
-              changeValue = props.value.substr(0, props.value.length - 1);
-              emit("input", changeValue);
+            if (props.modelValue) {
+              changeValue = props.modelValue.substr(
+                0,
+                props.modelValue.length - 1
+              );
+              emit("update:modelValue", changeValue);
             } else {
               changeValue = currentInput.value.substr(
                 0,
@@ -327,9 +334,9 @@ export default defineComponent({
      */
     function change(value: string) {
       let changeValue: string;
-      if (props.value) {
-        changeValue = props.value + value;
-        emit("input", changeValue);
+      if (props.modelValue) {
+        changeValue = props.modelValue + value;
+        emit("update:modelValue", changeValue);
       } else {
         changeValue = currentInput.value + value;
         currentInput.value = changeValue;
@@ -358,6 +365,13 @@ export default defineComponent({
       emit("keyChange", value);
     }
 
+    /**
+     * @description 重新注册键盘
+     */
+    function reSignUp() {
+      signUpKeyboard();
+    }
+
     onMounted(() => {
       // 如果需要遮罩添加遮罩层
       props.modal && addMoDal();
@@ -382,22 +396,25 @@ export default defineComponent({
     });
 
     // 注入到子组件
-    getProvide(reactive({
-      color: props.color,
-      modeList: props.modeList,
-      handApi: props.handApi,
-      closeKeyBoard: () => {
-        hideKeyBoard();
-      },
-      changeDefaultBoard: () => {
-        keyboardData.showMode = "default";
-      },
-    }));
+    getProvide(
+      reactive({
+        color: props.color,
+        modeList: props.modeList,
+        handApi: props.handApi,
+        closeKeyBoard: () => {
+          hideKeyBoard();
+        },
+        changeDefaultBoard: () => {
+          keyboardData.showMode = "default";
+        },
+      })
+    );
 
     return {
       ...toRefs(keyboardData),
-      defaultRef,
+      defaultBoardRef,
       translate,
+      reSignUp,
       trigger,
       change,
     };

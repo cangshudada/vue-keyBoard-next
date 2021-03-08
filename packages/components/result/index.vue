@@ -1,7 +1,7 @@
 <template>
   <div
     class="key-board-result"
-    :style="{color}"
+    :style="{ color }"
     v-if="status === 'CN' || status === 'handwrite'"
   >
     <div class="key-board-code-show" v-if="status === 'CN'">
@@ -17,88 +17,128 @@
         >
       </div>
       <div class="key-board-result-show-more" v-if="valueList.length > 11">
-        <span :style="style" @click="upper"></span>
-        <span :style="style" @click="lower"></span>
+        <span :style="getStyle" @click="upper"></span>
+        <span :style="getStyle" @click="lower"></span>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { groupSplitArray } from '@/utils';
-export default {
+<script lang="ts">
+import type { PropType } from "vue";
+import { groupSplitArray } from "@/utils";
+import { IResultData, IValue } from "@/typings";
+import { getInject } from "@/context/keyboardContext";
+import useEventEmitter from "@/hooks/useEventEmitter";
+import {
+  watch,
+  toRefs,
+  computed,
+  reactive,
+  onMounted,
+  onUnmounted,
+  defineComponent,
+} from "vue";
+export default defineComponent({
   props: {
-    data: Object,
+    data: Object as PropType<IValue>,
   },
-  inject: ["color"],
-  computed: {
-    style() {
-      return {
-        borderTopColor: this.color
-      }
-    }
-  },
-  data() {
-    return {
+  emits: ["change"],
+  setup(props: { data: IValue }, { emit }) {
+    const { color } = getInject();
+    const getStyle = computed(() => ({
+      borderTopColor: color,
+    }));
+    const resultData = reactive<IResultData>({
       status: "",
       valueList: [],
       showList: [],
       showIndex: 0,
+    });
+
+    /**
+     * @description 上一页
+     */
+    function upper() {
+      if (resultData.showIndex === 0) return;
+      resultData.showIndex -= 1;
+    }
+
+    /**
+     * @description 下一页
+     */
+    function lower() {
+      if (resultData.showIndex === resultData.showList.length - 1) return;
+      resultData.showIndex += 1;
+    }
+
+    /**
+     * @description 重置
+     */
+    function reset() {
+      resultData.showIndex = 0;
+      resultData.showList = [];
+      resultData.valueList = [];
+      useEventEmitter.emit("resultReset");
+    }
+
+    /**
+     * @description 上一页
+     */
+    function selectWord(word) {
+      reset();
+      emit("change", word);
+    }
+
+    // 监听data的变化
+    watch(
+      () => props.data,
+      (newVal) => {
+        resultData.showIndex = 0;
+        resultData.valueList = newVal?.value?.split("") || [];
+        if (resultData.valueList.length === 0) {
+          resultData.showList = [];
+          return;
+        }
+        resultData.showList = groupSplitArray(resultData.valueList, 11);
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    onMounted(() => {
+      useEventEmitter.on("keyBoardChange", (status: string) => {
+        // 会引起高度变化 需要重新计算画板
+        useEventEmitter.emit("updateBound");
+        resultData.status = status;
+        reset();
+      });
+
+      useEventEmitter.on("getWordsFromServer", (serverData: string) => {
+        const _valueList = Array.from(
+          new Set(serverData.replace(/\s+/g, "").split("")) 
+        );
+        resultData.valueList = _valueList;
+        resultData.showList = groupSplitArray(_valueList, 11);
+      });
+    });
+
+    onUnmounted(() => {
+      useEventEmitter.remove("keyBoardChange");
+      useEventEmitter.remove("getWordsFromServer");
+    });
+
+    return {
+      color,
+      upper,
+      lower,
+      getStyle,
+      selectWord,
+      ...toRefs(resultData),
     };
   },
-  created() {
-    this.$EventBus.$on("keyBoardChange", status => {
-      // 会引起高度变化 需要重新计算画板
-      this.$EventBus?.$emit("updateBound");
-      this.status = status;
-      this.reset();
-    });
-
-    this.$EventBus?.$on("getWordsFromServer", data => {
-      this.valueList = [...new Set(data.replace(/\s+/g, "").split(""))];
-      this.showList = groupSplitArray(this.valueList, 11);
-    });
-  },
-  watch: {
-    data: {
-      handler: function (newVal) {
-        this.showIndex = 0;
-        this.valueList = newVal?.value?.split("") || [];
-        if (this.valueList.length === 0) {
-          this.showList = [];
-          return
-        }
-
-        this.showList = groupSplitArray(this.valueList, 11);
-      },
-      immediate: true
-    }
-  },
-  methods: {
-    // 重置
-    reset() {
-      this.showIndex = 0;
-      this.showList = [];
-      this.valueList = [];
-      this.$EventBus?.$emit("resultReset");
-    },
-    // 上一页
-    upper() {
-      if (this.showIndex === 0) return;
-      this.showIndex -= 1;
-    },
-    // 下一页
-    lower() {
-      if (this.showIndex === this.showList.length - 1) return;
-      this.showIndex += 1;
-    },
-    // 选择某个词
-    selectWord(word) {
-      this.reset();
-      this.$emit("change", word);
-    }
-  }
-};
+});
 </script>
 
 <style scoped lang='less'>
