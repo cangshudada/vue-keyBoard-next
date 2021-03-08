@@ -76,8 +76,8 @@ $ yarn add vue-keyboard-virtual-next --save
 ```javascript
 import App from "./app.vue";
 import { createApp } from "vue";
-import "keyboard-virtual-vue/keyboard.min.css";
-import KeyBoard from "keyboard-virtual-vue";
+import "vue-keyboard-virtual-next/keyboard.min.css";
+import KeyBoard from "vue-keyboard-virtual-next";
 
 createApp(App)
   .use(keyBoard)
@@ -163,8 +163,8 @@ export default defineComponent({
 </template>
 
 <script lang="ts">
-import "keyboard-virtual-vue/keyboard.min.css";
-import KeyBoard from "keyboard-virtual-vue";
+import "vue-keyboard-virtual-next/keyboard.min.css";
+import KeyBoard from "vue-keyboard-virtual-next";
 import { defineComponent, ref, onMounted } from "vue";
 export default defineComponent({
   components: { KeyBoard },
