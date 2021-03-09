@@ -87,7 +87,7 @@ export default defineComponent({
     // 是否blur状态下自动隐藏
     blurHide: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     // 是否显示拖拽句柄
     showHandleBar: {

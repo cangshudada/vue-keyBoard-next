@@ -101,7 +101,7 @@ export default defineComponent({
       } else if (event.type.includes("touch")) {
         // touch事件
         const _event = event as TouchEvent;
-        return Math.floor(_event.targetTouches[0].clientX - paintBoardData.x);
+        return Math.floor(_event.targetTouches[0]?.clientX - paintBoardData.x);
       }
       return 0;
     }
@@ -117,7 +117,7 @@ export default defineComponent({
       } else if (event.type.includes("touch")) {
         // touch事件
         const _event = event as TouchEvent;
-        return Math.floor(_event.targetTouches[0].clientY - paintBoardData.y);
+        return Math.floor(_event.targetTouches[0]?.clientY - paintBoardData.y);
       }
       return 0;
     }
