@@ -322,7 +322,11 @@ export default defineComponent({
               );
               currentInput.value = changeValue;
             }
-            emit("change", changeValue);
+            emit(
+              "change",
+              changeValue,
+              currentInput.getAttribute("data-prop") || currentInput
+            );
           }
           break;
       }
@@ -341,8 +345,16 @@ export default defineComponent({
         changeValue = currentInput.value + value;
         currentInput.value = changeValue;
       }
-      emit("change", changeValue);
-      emit("keyChange", value);
+      emit(
+        "change",
+        changeValue,
+        currentInput.getAttribute("data-prop") || currentInput
+      );
+      emit(
+        "keyChange",
+        value,
+        currentInput.getAttribute("data-prop") || currentInput
+      );
     }
 
     /**
@@ -362,7 +374,11 @@ export default defineComponent({
             : pinYinNote[keys[0]]
           : "",
       };
-      emit("keyChange", value);
+      emit(
+        "keyChange",
+        value,
+        currentInput.getAttribute("data-prop") || currentInput
+      );
     }
 
     /**
@@ -370,6 +386,13 @@ export default defineComponent({
      */
     function reSignUp() {
       signUpKeyboard();
+    }
+
+    /**
+     * @description 获取当前聚焦的输入框
+     */
+    function getCurrentInput() {
+      return currentInput;
     }
 
     onMounted(() => {
@@ -413,6 +436,7 @@ export default defineComponent({
     return {
       ...toRefs(keyboardData),
       defaultBoardRef,
+      getCurrentInput,
       translate,
       reSignUp,
       trigger,
