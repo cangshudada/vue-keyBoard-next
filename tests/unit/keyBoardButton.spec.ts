@@ -3,8 +3,8 @@ import KeyCodeButton from "../../packages/components/keyCodeButtton/index.vue";
 
 describe("keyCodeButton.vue", () => {
   it("button click set value change", async () => {
-    let _value: string = "";
-    let _type: string = "";
+    let _value = "";
+    let _type = "";
     const wrapper = mount({
       components: {
         KeyCodeButton,
