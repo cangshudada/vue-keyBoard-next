@@ -294,11 +294,27 @@ export default defineComponent({
       });
     }
 
-    /**
+/**
+ * @description 删除文字
+ * @param curVal 
+ */
+  function deleteText(curVal:string,){
+            const input =  currentInput
+            const startPos = input.selectionStart;
+            const endPos = input.selectionEnd;
+            const result = curVal.substring(0, startPos-1)  + curVal.substring(endPos)
+            input.value = result;
+            input.focus();
+            input.selectionStart = startPos -1;
+            input.selectionEnd = startPos-1;
+            return result
+      }
+    /** 
      * @description 模式切换
      * @param {IKeyCode} {type}
      */
     function trigger({ type }: IKeyCode) {
+      
       switch (type) {
         case "handwrite":
           {
@@ -310,16 +326,18 @@ export default defineComponent({
             let changeValue: string;
             // v-model exist
             if (props.modelValue) {
-              changeValue = props.modelValue.substr(
-                0,
-                props.modelValue.length - 1
-              );
+              // changeValue = props.modelValue.substr(
+              //   0,
+              //   props.modelValue.length - 1
+              // );
+              changeValue = deleteText( props.modelValue+'')
               emit("update:modelValue", changeValue);
             } else {
-              changeValue = currentInput.value.substr(
-                0,
-                currentInput.value.length - 1
-              );
+              // changeValue = currentInput.value.substr(
+              //   0,
+              //   currentInput.value.length - 1
+              // );
+              changeValue = deleteText( currentInput.value)
               currentInput.value = changeValue;
             }
             emit(
@@ -330,19 +348,44 @@ export default defineComponent({
           }
           break;
       }
-    }
 
+ 
+    }
+/**
+ * @description 插入新文字
+ * @param curVal 
+ * @param insertTxt 
+ */
+ function inputText( curVal:string,insertTxt:string){
+    
+    const input =  currentInput
+    const startPos = input.selectionStart;
+    const endPos = input.selectionEnd;
+
+    if (startPos === undefined || endPos === undefined) return
+    
+    const result = curVal.substring(0, startPos) + insertTxt + curVal.substring(endPos)
+    input.value = result;
+    input.focus();
+    input.selectionStart = startPos + insertTxt.length;
+    input.selectionEnd = startPos + insertTxt.length;
+    return result;
+    }
     /**
      * @description 文字改变
      * @param {string} value
      */
     function change(value: string) {
+      
       let changeValue: string;
       if (props.modelValue) {
-        changeValue = props.modelValue + value;
+        // changeValue = props.modelValue + value;
+        changeValue = inputText(props.modelValue+'',value)
+        // inputText(props.modelValue,value)
         emit("update:modelValue", changeValue);
       } else {
-        changeValue = currentInput.value + value;
+        // changeValue = currentInput.value + value;
+        changeValue = inputText(currentInput.value,value)
         currentInput.value = changeValue;
       }
       emit(
@@ -356,6 +399,8 @@ export default defineComponent({
         currentInput.getAttribute("data-prop") || currentInput
       );
     }
+
+
 
     /**
      * @description 拼音转中文
