@@ -7,28 +7,14 @@
         <Result :data="resultVal" @change="change" />
         <div class="key-board-area">
           <!-- 默认键盘 -->
-          <DefaultBoard
-            ref="defaultBoardRef"
-            v-if="showMode === 'default'"
-            @trigger="trigger"
-            @change="change"
-            @translate="translate"
-          />
+          <DefaultBoard ref="defaultBoardRef" v-if="showMode === 'default'" @trigger="trigger" @change="change"
+            @translate="translate" />
           <!-- 手写键盘 -->
-          <HandBoard
-            v-if="showMode === 'handwrite'"
-            @trigger="trigger"
-            @change="change"
-          />
+          <HandBoard v-if="showMode === 'handwrite'" @trigger="trigger" @change="change" />
         </div>
       </div>
       <!-- 拖拽句柄 -->
-      <div
-        v-if="showHandleBar"
-        class="key-board-drag-handle"
-        :style="{ color }"
-        v-handleDrag
-      >
+      <div v-if="showHandleBar" class="key-board-drag-handle" :style="{ color }" v-handleDrag>
         <span>{{ dargHandleText || "将键盘拖到您喜欢的位置" }}</span>
         <svg-icon icon-class="drag" />
       </div>
@@ -66,9 +52,9 @@ const importAll = (r) => r.keys().map(r);
 importAll(requireContext);
 
 // 注册键盘绑定的input列表
-const inputList: HTMLInputElement[] = [];
+const inputList: (HTMLInputElement | HTMLTextAreaElement)[] = [];
 // 当前触发的input
-let currentInput: HTMLInputElement | null = null;
+let currentInput: HTMLInputElement | HTMLTextAreaElement | null = null;
 
 export default defineComponent({
   name: "KeyBoard",
@@ -202,12 +188,12 @@ export default defineComponent({
     /**
      * @description 显示键盘
      */
-    function showKeyBoard(event: FocusEvent) {
+    function showKeyBoard(event: Event) {
       // 显示键盘
       keyboardData.visible = true;
 
       // 赋值当前事件触发的input
-      currentInput = event.target as HTMLInputElement;
+      currentInput = event.target as HTMLInputElement | HTMLTextAreaElement;
 
       // 设置默认的键盘显示模式
       setDefaultKeyBoardMode(currentInput.getAttribute("data-mode") as string);
@@ -284,7 +270,9 @@ export default defineComponent({
       // 设置baseUrl
       props.handApi && axiosConfig(props.handApi);
       // 给键盘绑定相应input
-      document.querySelectorAll("input").forEach((input) => {
+      [...document.querySelectorAll("input"),
+      ...document.querySelectorAll('textarea')
+      ].forEach((input) => {
         // 存在data-mode属性的可以注册为键盘input
         if (input.getAttribute("data-mode") !== null) {
           inputList.push(input);
@@ -294,27 +282,29 @@ export default defineComponent({
       });
     }
 
-/**
- * @description 删除文字
- * @param curVal 
- */
-  function deleteText(curVal:string,){
-            const input =  currentInput
-            const startPos = input.selectionStart;
-            const endPos = input.selectionEnd;
-            const result = curVal.substring(0, startPos-1)  + curVal.substring(endPos)
-            input.value = result;
-            input.focus();
-            input.selectionStart = startPos -1;
-            input.selectionEnd = startPos-1;
-            return result
-      }
-    /** 
+    /**
+    * @description 删除文字
+    * @param curVal
+    */
+    function deleteText(curVal: string) {
+      if (!currentInput) return ''
+      const input = currentInput
+      const startPos = input.selectionStart;
+      const endPos = input.selectionEnd;
+      if (!startPos || !endPos) return ''
+      const result = curVal.substring(0, startPos - 1) + curVal.substring(endPos)
+      input.value = result;
+      input.focus();
+      input.selectionStart = startPos - 1;
+      input.selectionEnd = startPos - 1;
+      return result
+    }
+    /**
      * @description 模式切换
      * @param {IKeyCode} {type}
      */
     function trigger({ type }: IKeyCode) {
-      
+
       switch (type) {
         case "handwrite":
           {
@@ -323,21 +313,14 @@ export default defineComponent({
           break;
         case "delete":
           {
+            if (!currentInput) return
             let changeValue: string;
             // v-model exist
             if (props.modelValue) {
-              // changeValue = props.modelValue.substr(
-              //   0,
-              //   props.modelValue.length - 1
-              // );
-              changeValue = deleteText( props.modelValue+'')
+              changeValue = deleteText(props.modelValue + '')
               emit("update:modelValue", changeValue);
             } else {
-              // changeValue = currentInput.value.substr(
-              //   0,
-              //   currentInput.value.length - 1
-              // );
-              changeValue = deleteText( currentInput.value)
+              changeValue = deleteText(currentInput.value)
               currentInput.value = changeValue;
             }
             emit(
@@ -349,43 +332,42 @@ export default defineComponent({
           break;
       }
 
- 
-    }
-/**
- * @description 插入新文字
- * @param curVal 
- * @param insertTxt 
- */
- function inputText( curVal:string,insertTxt:string){
-    
-    const input =  currentInput
-    const startPos = input.selectionStart;
-    const endPos = input.selectionEnd;
 
-    if (startPos === undefined || endPos === undefined) return
-    
-    const result = curVal.substring(0, startPos) + insertTxt + curVal.substring(endPos)
-    input.value = result;
-    input.focus();
-    input.selectionStart = startPos + insertTxt.length;
-    input.selectionEnd = startPos + insertTxt.length;
-    return result;
+    }
+    /**
+     * @description 插入新文字
+     * @param curVal
+     * @param insertTxt
+     */
+    function inputText(curVal: string, insertTxt: string) {
+      if (!currentInput) return ''
+      const input = currentInput
+      const startPos = input.selectionStart;
+      const endPos = input.selectionEnd;
+
+      if (!startPos || !endPos) return ''
+
+      const result = curVal.substring(0, startPos) + insertTxt + curVal.substring(endPos)
+      input.value = result;
+      input.focus();
+      input.selectionStart = startPos + insertTxt.length;
+      input.selectionEnd = startPos + insertTxt.length;
+      return result;
     }
     /**
      * @description 文字改变
      * @param {string} value
      */
     function change(value: string) {
-      
+      if (!currentInput) return
       let changeValue: string;
       if (props.modelValue) {
-        // changeValue = props.modelValue + value;
-        changeValue = inputText(props.modelValue+'',value)
+        changeValue = inputText(props.modelValue + '', value)
         // inputText(props.modelValue,value)
         emit("update:modelValue", changeValue);
       } else {
         // changeValue = currentInput.value + value;
-        changeValue = inputText(currentInput.value,value)
+        changeValue = inputText(currentInput.value, value)
         currentInput.value = changeValue;
       }
       emit(
@@ -419,7 +401,7 @@ export default defineComponent({
             : pinYinNote[keys[0]]
           : "",
       };
-      emit(
+      currentInput && emit(
         "keyChange",
         value,
         currentInput.getAttribute("data-prop") || currentInput

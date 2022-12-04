@@ -6,6 +6,10 @@
         <input data-mode class="form-control" v-model="value" />
       </div>
       <div class="form-group">
+        <label>文本域支持</label>
+        <textarea data-mode class="form-control" v-model="value"></textarea>
+      </div>
+      <div class="form-group">
         <label>英文键盘</label>
         <input data-mode="en" class="form-control" v-model="value" />
       </div>

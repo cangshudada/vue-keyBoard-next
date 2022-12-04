@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lib": "vue-cli-service build --target lib --name keyboard --dest lib packages/index.ts",
-    "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "serve": "set NODE_OPTIONS=--openssl-legacy-provider & vue-cli-service serve",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider & vue-cli-service build",
+    "lib": "set NODE_OPTIONS=--openssl-legacy-provider & vue-cli-service build --target lib --name keyboard --dest lib packages/index.ts",
+    "test:unit": "set NODE_OPTIONS=--openssl-legacy-provider & vue-cli-service test:unit",
+    "lint": "set NODE_OPTIONS=--openssl-legacy-provider & vue-cli-service lint"
   },
   "dependencies": {
     "axios": "^0.21.1",
