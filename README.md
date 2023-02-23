@@ -165,7 +165,7 @@ export default defineComponent({
 | 方法名          | 说明                                                         | 类型                            | 版本    |
 | --------------- | ------------------------------------------------------------ | ------------------------------- | ------- |
 | reSignUp        | 重新给input注册绑定键盘,当页面有新的input标签出现时调用此方法 | （）=> void                     | v1.0.0+ |
-| getCurrentInput | 获取当前聚焦的输入框                                         | （）=> HTMLInputElement \| HTMLTextAreaElement \| v1.0.2+ |
+| getCurrentInput | 获取当前聚焦的输入框                                         | （）=> HTMLInputElement \| HTMLTextAreaElement |v1.0.2+|
 
 ```vue
 <template>
