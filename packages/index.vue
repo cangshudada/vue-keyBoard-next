@@ -342,10 +342,8 @@ export default defineComponent({
     function inputText(curVal: string, insertTxt: string) {
       if (!currentInput) return ''
       const input = currentInput
-      const startPos = input.selectionStart;
-      const endPos = input.selectionEnd;
-
-      if (!startPos || !endPos) return ''
+      const startPos = input.selectionStart || 0;
+      const endPos = input.selectionEnd || 0;
 
       const result = curVal.substring(0, startPos) + insertTxt + curVal.substring(endPos)
       input.value = result;
@@ -363,10 +361,8 @@ export default defineComponent({
       let changeValue: string;
       if (props.modelValue) {
         changeValue = inputText(props.modelValue + '', value)
-        // inputText(props.modelValue,value)
         emit("update:modelValue", changeValue);
       } else {
-        // changeValue = currentInput.value + value;
         changeValue = inputText(currentInput.value, value)
         currentInput.value = changeValue;
       }
