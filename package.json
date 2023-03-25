@@ -1,7 +1,7 @@
 {
-  "name": "keyboard-next",
-  "version": "0.1.4",
-  "private": true,
+  "name": "vue-keyboard-virtual-next",
+  "version": "1.0.4",
+  "private": false,
   "scripts": {
     "serve": "set NODE_OPTIONS=--openssl-legacy-provider & vue-cli-service serve",
     "build": "set NODE_OPTIONS=--openssl-legacy-provider & vue-cli-service build",
