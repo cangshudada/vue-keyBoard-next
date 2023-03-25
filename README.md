@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.cmappax.com/keyboard/vue@next">
+  <a href="https://codesandbox.io/s/vue-keyboard-next-0s9mp8?file=/src/main.js">
     <img width="500" src="https://www.cmappax.com/editorResource/keyboard/keyboard.svg" alt="Logo">
   </a>
 </p>
@@ -22,8 +22,9 @@
 <br>
 
 <h4 align="center">
-  <a href="https://www.cmappax.com/keyboard/vue@next">Fully Featured demo</a>
+  <a href="https://codesandbox.io/s/vue-keyboard-next-0s9mp8?file=/src/main.js">Fully Featured demo (latest)</a>
 </h4>
+
 
 > ### Other versions
 
