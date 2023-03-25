@@ -30,7 +30,7 @@ export default defineComponent({
     PaintBoard,
     KeyCodeButton,
   },
-  setup() {
+  setup(props, { emit }) {
     const injectData = getInject();
     const paintPartData = reactive<IPaintPartData>({
       // 手写板部分按钮列表
@@ -85,7 +85,7 @@ export default defineComponent({
         // 删除
         case "delete":
           {
-            useEventEmitter.emit("trigger", {
+            emit("trigger", {
               data,
               type,
             });

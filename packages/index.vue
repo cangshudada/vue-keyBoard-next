@@ -87,8 +87,6 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
-    // v-model
-    modelValue: String,
     // 手写识别接口  如果不存在则不会显示手写面板
     handApi: String,
     // 动画的className
@@ -96,7 +94,7 @@ export default defineComponent({
     // 拖拽句柄文字
     dargHandleText: String,
   },
-  emits: ["keyChange", "update:modelValue", "change", "closed", "modalClick"],
+  emits: ["keyChange", "change", "closed", "modalClick"],
   directives: { handleDrag },
   components: {
     Result,
@@ -314,15 +312,8 @@ export default defineComponent({
         case "delete":
           {
             if (!currentInput) return
-            let changeValue: string;
-            // v-model exist
-            if (props.modelValue) {
-              changeValue = deleteText(props.modelValue + '')
-              emit("update:modelValue", changeValue);
-            } else {
-              changeValue = deleteText(currentInput.value)
-              currentInput.value = changeValue;
-            }
+            const changeValue = deleteText(currentInput.value)
+            currentInput.value = changeValue;
             emit(
               "change",
               changeValue,
@@ -358,14 +349,8 @@ export default defineComponent({
      */
     function change(value: string) {
       if (!currentInput) return
-      let changeValue: string;
-      if (props.modelValue) {
-        changeValue = inputText(props.modelValue + '', value)
-        emit("update:modelValue", changeValue);
-      } else {
-        changeValue = inputText(currentInput.value, value)
-        currentInput.value = changeValue;
-      }
+      const changeValue = inputText(currentInput.value, value)
+      currentInput.value = changeValue;
       emit(
         "change",
         changeValue,

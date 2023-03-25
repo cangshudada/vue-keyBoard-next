@@ -3,41 +3,47 @@
     <form>
       <div class="form-group">
         <label>默认</label>
-        <input data-mode class="form-control" v-model="value" />
+        <input data-mode class="form-control" :value="value" />
       </div>
       <div class="form-group">
         <label>文本域支持</label>
-        <textarea data-mode class="form-control" v-model="value"></textarea>
+        <textarea data-mode class="form-control" :value="value" />
       </div>
       <div class="form-group">
         <label>英文键盘</label>
-        <input data-mode="en" class="form-control" v-model="value" />
+        <input data-mode="en" class="form-control" :value="value" />
       </div>
       <div class="form-group">
         <label>数字键盘</label>
-        <input data-mode="number" class="form-control" v-model="value" />
+        <input data-mode="number" class="form-control" :value="value" />
       </div>
       <div class="form-group">
         <label>标点键盘</label>
-        <input data-mode="symbol" class="form-control" v-model="value" />
+        <input data-mode="symbol" class="form-control" :value="value" />
       </div>
       <div class="form-group">
         <label>手写键盘</label>
-        <input data-mode="handwrite" class="form-control" v-model="value" />
+        <input data-mode="handwrite" class="form-control" :value="value" />
       </div>
     </form>
-    <KeyBoard modal />
+    <KeyBoard modal handApi="https://www.baidu.com" @change="change"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 export default defineComponent({
   setup() {
-    const value = ref<string>("你好");
+    const value = "你好";
+
+    function change(value, inputEl) {
+      console.log('change value ---->', value)
+      console.log('change input dom ---->', inputEl)
+    }
 
     return {
       value,
+      change
     };
   },
 });

@@ -99,21 +99,26 @@ createApp(App)
 ```vue
 <template>
   <!-- keyboard 只识别带有 data-mode 标识的输入框 -->
-  <input data-mode v-model="value" />
-  <KeyBoard />
+  <input data-mode value="hello" />
+  <KeyBoard @change='change'/>
 </template>
 
 <script lang="ts">
 import "keyboard-virtual-vue/keyboard.min.css";
 import KeyBoard from "keyboard-virtual-vue";
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 export default defineComponent({
   components: { KeyBoard },
   setup() {
-    const value = ref<string>("你好");
+    // 第一个参数为当前focus的输入框的value值变化
+    // 第二个参数为当前foucs的输入框
+    function change(value, inputEl) {
+      console.log('change value ---->', value)
+      console.log('change input dom ---->', inputEl)
+    }
 
     return {
-      value,
+      change
     };
   },
 });
@@ -134,18 +139,18 @@ export default defineComponent({
 
 ### Props属性
 
-|       参数        |                             说明                             |         默认值          |      类型      | 是否必须 |  版本   |
-| :---------------: | :----------------------------------------------------------: | :---------------------: | :------------: | :------: | :-----: |
-|      v-model      | _绑定的输入框value_,可同时双向绑定多个输入框，不传则只与当前focus输入框做数据绑定关系 |                         | string\|number |    否    | v1.0.0+ |
-|       color       |                           _主题色_                           |        `#eaa050`        |     string     |    否    | v1.0.0+ |
-|     modeList      |      _键盘渲染模式列表_，若不传handApi则不会出现手写板       | ["handwrite", "symbol"] |    string[]    |    否    | v1.0.0+ |
-|     blurHide      |               _是否当前输入框blur事件触发隐藏_               |          true           |    boolean     |    否    | v1.0.0+ |
-|   showHandleBar   |                      _是否显示拖拽句柄_                      |          true           |    boolean     |    否    | v1.0.0+ |
-|  dargHandleText   |                       拖拽句柄提示文字                       |                         |     string     |    否    | v1.0.0+ |
-|       modal       |                       _是否显示遮罩层_                       |          false          |    boolean     |    否    | v1.0.0+ |
-| closeOnClickModal |                    是否点击遮罩层隐藏键盘                    |          true           |    boolean     |    否    | v1.0.0+ |
-|      handApi      |            手写识别接口，若不传则无法切换手写模块            |                         |     string     |    否    | v1.0.0+ |
-|   animateClass    | 键盘显隐动画，内置slide动画，如若需要其他动画，可传入相应类名自定义动画 |                         |     string     |    否    | v1.0.0+ |
+|       参数        |                             说明                             |         默认值          |   类型   | 是否必须 |    版本     |
+| :---------------: | :----------------------------------------------------------: | :---------------------: | :------: | :------: | :---------: |
+|    ~~v-model~~    | ~~_绑定的输入框value_,可同时双向绑定多个输入框，不传则只与当前focus输入框做数据绑定关系~~ |                         |          |    否    | v1.0.4+废弃 |
+|       color       |                           _主题色_                           |        `#eaa050`        |  string  |    否    |   v1.0.0+   |
+|     modeList      |      _键盘渲染模式列表_，若不传handApi则不会出现手写板       | ["handwrite", "symbol"] | string[] |    否    |   v1.0.0+   |
+|     blurHide      |               _是否当前输入框blur事件触发隐藏_               |          true           | boolean  |    否    |   v1.0.0+   |
+|   showHandleBar   |                      _是否显示拖拽句柄_                      |          true           | boolean  |    否    |   v1.0.0+   |
+|  dargHandleText   |                       拖拽句柄提示文字                       |                         |  string  |    否    |   v1.0.0+   |
+|       modal       |                       _是否显示遮罩层_                       |          false          | boolean  |    否    |   v1.0.0+   |
+| closeOnClickModal |                    是否点击遮罩层隐藏键盘                    |          true           | boolean  |    否    |   v1.0.0+   |
+|      handApi      |            手写识别接口，若不传则无法切换手写模块            |                         |  string  |    否    |   v1.0.0+   |
+|   animateClass    | 键盘显隐动画，内置slide动画，如若需要其他动画，可传入相应类名自定义动画 |                         |  string  |    否    |   v1.0.0+   |
 
 
 
@@ -170,8 +175,8 @@ export default defineComponent({
 ```vue
 <template>
   <!-- keyboard 只识别带有 data-mode 标识的输入框 -->
-  <input data-mode v-model="value" />
-  <KeyBoard ref="keyBoardRef"/>
+  <input data-mode :value="你好" />
+  <KeyBoard ref="keyBoardRef" @change="change"/>
 </template>
 
 <script lang="ts">
@@ -181,7 +186,6 @@ import { defineComponent, ref, onMounted } from "vue";
 export default defineComponent({
   components: { KeyBoard },
   setup() {
-    const value = ref<string>("你好");
     const keyBoardRef = ref<typeof KeyBoard | null>(null);
       
     onMounted(() => {
@@ -189,8 +193,15 @@ export default defineComponent({
         keyBoardRef.value?.reSignUp();
     })
 
+    // 第一个参数为当前focus的输入框的value值变化
+    // 第二个参数为当前foucs的输入框
+    function change(value, inputEl) {
+      console.log('change value ---->', value)
+      console.log('change input dom ---->', inputEl)
+    }
+ 
     return {
-      value,
+      change,
       keyBoardRef
     };
   },
